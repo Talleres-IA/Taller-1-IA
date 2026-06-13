@@ -1,0 +1,54 @@
+{
+  "single_bogota_medellin": {
+    "problem": "single",
+    "algorithm": "ucs",
+    "start": "n1037511",
+    "goal": "n39739"
+  },
+  "single_bogota_cartagena_astar": {
+    "problem": "single",
+    "algorithm": "astar",
+    "heuristic": "straightLineHeuristic",
+    "start": "n1037511",
+    "goal": "n1006018"
+  },
+  "stops_bogota_cali_bfs": {
+    "problem": "stops",
+    "algorithm": "bfs",
+    "start": "n1037511",
+    "goal": "n15395"
+  },
+  "multi_andes_caribe": {
+    "problem": "multi",
+    "algorithm": "astar",
+    "heuristic": "straightLineMultiDeliveryHeuristic",
+    "start": "n1037511",
+    "deliveries": [
+      "n39739",
+      "n15395",
+      "n241545",
+      "n76898"
+    ]
+  },
+  "multi_national_challenge": {
+    "problem": "multi",
+    "algorithm": "astar",
+    "heuristic": "straightLineMultiDeliveryHeuristic",
+    "start": "n1037511",
+    "deliveries": [
+      "n15395",
+      "n39739",
+      "n1006018",
+      "n260990",
+      "n96684",
+      "n214091"
+    ]
+  },
+  "ids_local_depth": {
+    "problem": "stops",
+    "algorithm": "ids",
+    "start": "n1037511",
+    "goal": "n66995",
+    "max_depth": 6
+  }
+}

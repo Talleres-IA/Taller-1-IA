@@ -1,0 +1,5 @@
+folium>=0.20
+ipykernel>=6.31
+nbclient>=0.10
+nbformat>=5.10
+plotly>=6.8
