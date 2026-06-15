@@ -136,29 +136,28 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    frontier = utils.PriorityQueue()
-    start = problem.getStartState()
-    frontier.push((start, [], 0.0), 0.0)
-    best_cost: dict = {start: 0.0}
-
-    while not frontier.isEmpty():
-        _remember_frontier(problem, frontier)
-        state, actions, cost = frontier.pop()
-
-        if cost > best_cost.get(state, float("inf")):
+    visitados = set()
+    estadoi = problem.getStartState()
+    colapri = utils.PriorityQueue()
+    hinicial = heuristic(estadoi, problem)
+    colapri.push((estadoi, 0, []),hinicial)
+    while not colapri.isEmpty():
+        _remember_frontier(problem, colapri)
+        estado, g, camino = colapri.pop()
+        if estado in visitados:
             continue
-
-        if problem.isGoalState(state):
-            return actions
-
-        for successor, action, step_cost in problem.getSuccessors(state):
-            new_cost = cost + step_cost
-            if new_cost < best_cost.get(successor, float("inf")):
-                best_cost[successor] = new_cost
-                frontier.push((successor, actions + [action], new_cost), new_cost + heuristic(successor, problem))
-        _remember_frontier(problem, frontier)
-
+        if problem.isGoalState(estado):
+            return camino #es el camino acumulado
+        visitados.add(estado)
+        for s, accion, c in problem.getSuccessors(estado):
+            nuevog = g + c
+            nuevof = nuevog + heuristic(s, problem)
+            colapri.push((s, nuevog, camino + [accion]), nuevof)
+    
     return []
+
+
+
 
 
 def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
