@@ -247,3 +247,5 @@ bfs = breadthFirstSearch
 ucs = uniformCostSearch
 astar = aStarSearch
 ids = iterativeDeepeningSearch
+
+# se ven los cambios ??
