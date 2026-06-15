@@ -7,6 +7,8 @@ from typing import Any
 
 from algorithms import utils
 from graph.road_graph import haversine_km
+from algorithms.problems import SearchProblem, State
+
 
 
 def nullHeuristic(_state: Any, _problem: Any = None) -> float:
@@ -24,8 +26,28 @@ def straightLineHeuristic(state: str, problem: Any) -> float:
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # mostrar frontera, costo, nodos expandidos, acciones...
+    # VERSIÓN INICIAL de autoría propia:
+    # Se planteó una heurística Manhattan sobre coordenadas:
+    #
+    # function heuristic(node):
+    #     dx = abs(node.x - goal.x)
+    #     dy = abs(node.y - goal.y)
+    #     return D * (dx + dy)
+    # El problema de esta versión es que Manhattan no es apropiada para
+    # coordenadas geográficas (latitud/longitud), donde la distancia real
+    # entre dos puntos sobre la superficie terrestre requiere haversine
+    # PROMPTS USADOS CON IA (Claude):
+    #
+    # 1. "qué dos nodos necesito para calcular la distancia en línea recta?"
+    #    El nodo actual es `state` (no problem.start), y el destino es problem.goal
+    #
+    # 2. "cómo retorno 0 cuando el problema optimiza paradas y no kilómetros?"
+    #    Verificar hasattr(problem, 'cost_mode') and problem.cost_mode == 'stops'
+    if hasattr(problem, 'cost_mode') and problem.cost_mode == 'stops':
+        return 0.0
+    actual = problem.graph.coordinates[state]
+    meta = problem.graph.coordinates[problem.goal]
+    return haversine_km(actual, meta)
     ### END YOUR CODE ###
 
 
@@ -45,8 +67,7 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # mostrar frontera, costo, nodos expandidos, acciones...
+    
     ### END YOUR CODE ###
 
 
