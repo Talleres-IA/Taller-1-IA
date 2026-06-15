@@ -41,6 +41,8 @@ def depthFirstSearch(problem: SearchProblem) -> list[str]:
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # debe usar _remember_frontier
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -54,6 +56,8 @@ def breadthFirstSearch(problem: SearchProblem) -> list[str]:
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # debe usar _remember_frontier
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -67,6 +71,8 @@ def uniformCostSearch(problem: SearchProblem) -> list[str]:
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # debe usar _remember_frontier
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -80,6 +86,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -93,6 +100,11 @@ def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
     start = problem.getStartState()
 
     def recursive_dls(state: State, actions: list[str], depth: int, path: set[State]):
+        
+        current = getattr(problem, "_max_frontier_size", 0)
+        problem._max_frontier_size = max(current, len(path))
+
+
         if problem.isGoalState(state):
             return actions
 
@@ -135,6 +147,7 @@ def iterativeDeepeningSearch(
         max_depth = 100000 # se pone siemrpe un número muy grande
 
     for depth in range(max_depth + 1):
+        # print("Probando profundidad:", depth) Me estaba falladno entonces puse esto
         result = depthLimitedSearch(problem, depth)
 
         if result is not None:

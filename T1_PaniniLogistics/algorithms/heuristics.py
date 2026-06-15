@@ -25,6 +25,7 @@ def straightLineHeuristic(state: str, problem: Any) -> float:
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -45,6 +46,7 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
@@ -60,6 +62,7 @@ def straightLineMultiDeliveryHeuristic(
 
     ### YOUR CODE HERE ###
     utils.raiseNotDefined()
+    # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
 
 
