@@ -136,6 +136,38 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
+    # MI VERSIÓN INICIAL
+    # def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
+    #     visitados = set()
+    #     estadoi = problem.getStartState()
+    #     colapri = utils.PriorityQueue()
+    #     colapri.push((estadoi, []), 0, 0)   # ACÁ había un error ya que push recibe 2 args, no 3
+    #     while not colapri.isEmpty():
+    #         _remember_frontier(problem, colapri)
+    #         estado, accion, costo = colapri.pop()  
+    #         if estado in visitados():              # visitados no es una funcion 
+    #             continue
+    #         if problem.isGoalState(estado):
+    #             return estado                      # debía retornar camino no el estado
+    #             visitados.add(estado)             
+    #         for s, g, c in problem.getSuccessors(estado):  
+    #             nuevog = g + c
+    #             nuevof = nuevog + heuristic(sucesor, problem)  
+    #             return camino + [accion]  
+    # PROMPTS USADOS CON IA (Claude):
+    #
+    # 1. "qué va en la prioridad del push inicial si g=0?"
+    #    corrección: la prioridad es f = g + h, el item debe incluir g acumulado.
+    #    push((estadoi, 0, []), hinicial)
+    #
+    # 2. "cuándo marco un nodo como visitado y cómo verifico si es meta?"
+    #    corrección: visitados sin paréntesis; isGoalState() para verificar meta;
+    #    retornar camino (no estado); visitados.add() va después del chequeo.
+    #
+    # 3. "cómo evito pisar g acumulado en el for y qué pusheo al final?"
+    #    corrección: renombrar variables del for a (sucesor, accion, costo_paso);
+    #      nuevo_g = g + costo_paso; push item con camino (no c) + [accion].
+
     visitados = set()
     estadoi = problem.getStartState()
     colapri = utils.PriorityQueue()
@@ -247,5 +279,3 @@ ucs = uniformCostSearch
 astar = aStarSearch
 ids = iterativeDeepeningSearch
 
-# se ven los cambios ??
-# ahora ??
