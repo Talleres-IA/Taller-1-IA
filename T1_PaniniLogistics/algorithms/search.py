@@ -39,11 +39,28 @@ def depthFirstSearch(problem: SearchProblem) -> list[str]:
     - Expanded nodes are counted automatically inside `getSuccessors`.
     """
 
-    ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # debe usar _remember_frontier
-    # mostrar frontera, costo, nodos expandidos, acciones...
-    ### END YOUR CODE ###
+   ### YOUR CODE HERE ###
+    frontier = utils.Stack()
+    frontier.push((problem.getStartState(), []))
+    visited = set()
+ 
+    while not frontier.isEmpty():
+        _remember_frontier(problem, frontier)
+        state, actions = frontier.pop()
+ 
+        if state in visited:
+            continue
+        visited.add(state)
+ 
+        if problem.isGoalState(state):
+            return actions
+ 
+        for successor, action, _ in problem.getSuccessors(state):
+            if successor not in visited:
+                frontier.push((successor, actions + [action]))
+        _remember_frontier(problem, frontier)
+ 
+    return []
 
 
 def breadthFirstSearch(problem: SearchProblem) -> list[str]:
@@ -55,10 +72,25 @@ def breadthFirstSearch(problem: SearchProblem) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # debe usar _remember_frontier
-    # mostrar frontera, costo, nodos expandidos, acciones...
-    ### END YOUR CODE ###
+    frontier = utils.Queue()
+    start = problem.getStartState()
+    frontier.push((start, []))
+    visited = {start}  
+ 
+    while not frontier.isEmpty():
+        _remember_frontier(problem, frontier)
+        state, actions = frontier.pop()
+ 
+        if problem.isGoalState(state):
+            return actions
+ 
+        for successor, action, _ in problem.getSuccessors(state):
+            if successor not in visited:
+                visited.add(successor)
+                frontier.push((successor, actions + [action]))
+        _remember_frontier(problem, frontier)
+ 
+    return []
 
 
 def uniformCostSearch(problem: SearchProblem) -> list[str]:
@@ -70,10 +102,29 @@ def uniformCostSearch(problem: SearchProblem) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # debe usar _remember_frontier
-    # mostrar frontera, costo, nodos expandidos, acciones...
-    ### END YOUR CODE ###
+    frontier = utils.PriorityQueue()
+    start = problem.getStartState()
+    frontier.push((start, [], 0.0), 0.0)
+    best_cost: dict = {start: 0.0}
+ 
+    while not frontier.isEmpty():
+        _remember_frontier(problem, frontier)
+        state, actions, cost = frontier.pop()
+ 
+        if cost > best_cost.get(state, float("inf")):
+            continue
+ 
+        if problem.isGoalState(state):
+            return actions
+ 
+        for successor, action, step_cost in problem.getSuccessors(state):
+            new_cost = cost + step_cost
+            if new_cost < best_cost.get(successor, float("inf")):
+                best_cost[successor] = new_cost
+                frontier.push((successor, actions + [action], new_cost), new_cost)
+        _remember_frontier(problem, frontier)
+ 
+    return [] 
 
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
@@ -85,9 +136,29 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    # mostrar frontera, costo, nodos expandidos, acciones...
-    ### END YOUR CODE ###
+    frontier = utils.PriorityQueue()
+    start = problem.getStartState()
+    frontier.push((start, [], 0.0), 0.0)
+    best_cost: dict = {start: 0.0}
+
+    while not frontier.isEmpty():
+        _remember_frontier(problem, frontier)
+        state, actions, cost = frontier.pop()
+
+        if cost > best_cost.get(state, float("inf")):
+            continue
+
+        if problem.isGoalState(state):
+            return actions
+
+        for successor, action, step_cost in problem.getSuccessors(state):
+            new_cost = cost + step_cost
+            if new_cost < best_cost.get(successor, float("inf")):
+                best_cost[successor] = new_cost
+                frontier.push((successor, actions + [action], new_cost), new_cost + heuristic(successor, problem))
+        _remember_frontier(problem, frontier)
+
+    return []
 
 
 def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
