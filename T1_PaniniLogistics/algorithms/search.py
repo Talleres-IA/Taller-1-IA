@@ -90,10 +90,35 @@ def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
     - Depth counts actions taken from the start, not recursive calls made.
     - Keep a set of nodes on the current path to avoid revisiting them in one branch.
     """
+    start = problem.getStartState()
 
-    ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    ### END YOUR CODE ###
+    def recursive_dls(state: State, actions: list[str], depth: int, path: set[State]):
+        if problem.isGoalState(state):
+            return actions
+
+        if depth == limit:
+            return None
+
+        for successor, action, _step_cost in problem.getSuccessors(state):
+            if successor not in path:
+                path.add(successor)
+
+                result = recursive_dls(
+                    successor,
+                    actions + [action],
+                    depth + 1,
+                    path
+                )
+
+                if result is not None:
+                    return result
+
+                path.remove(successor)
+
+        return None
+    
+    return recursive_dls(start, [], 0, {start})
+    
 
 
 def iterativeDeepeningSearch(
@@ -106,9 +131,30 @@ def iterativeDeepeningSearch(
     - Save the successful depth in `problem._ids_depth_found` before returning.
     """
 
-    ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
-    ### END YOUR CODE ###
+    if max_depth is None:
+        max_depth = 100000 # se pone siemrpe un número muy grande
+
+    for depth in range(max_depth + 1):
+        result = depthLimitedSearch(problem, depth)
+
+        if result is not None:
+            problem._ids_depth_found = depth
+            return result
+
+    return []
+
+    """if max_depth is None:
+        max_depth = 40
+
+    for depth in range(max_depth + 1):
+        print("Probando profundidad:", depth)
+    result = depthLimitedSearch(problem, depth)
+
+    if result is not None:
+        problem._ids_depth_found = depth
+        return result
+    #Usé esto para proba si servía
+    """
 
 
 # Abbreviations used by the CLI and the statement.
