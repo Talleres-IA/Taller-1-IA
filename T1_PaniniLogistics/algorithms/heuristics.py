@@ -65,60 +65,24 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
     - Reuse `_mst_cost` with a distance function defined over delivery node IDs.
     """
 
-    ### YOUR CODE HERE ###
-    # VERSIÓN INICIAL autoría propia:
-    # Se tenía una idea parcial del loop para calcular la distancia mínima,
-    # pero con errores de nombres de variables y sin retorno:
-    #
-    # actual, elresto = state
-    # mindist = math.inf
-    # for n in elresto:
-    #     cooractual = problem.graph.coordinates[actual]
-    #     coornodo = problem.graph.coordinates[nodo]  # nodo no definido, debía ser n
-    #     dist = haversine_km(cooractual, coornodo)
-    #     if dist < mindist:
-    #         mindist = dist
-    # def distance_fn(a,b):
-    #     for m in elresto:              # loop innecesario
-    #         act = problem.graph.coordinates[a]
-    #         nod = problem.graph.coordinates[b]
-    #         distanciaa = haversine_km(act, nod)  # faltaba return
-    #
-    # PROMPTS USADOS CON IA (Claude):
-    #
-    # 1. "cómo estructuro la heurística para MultiDelivery?"
-    #     La heurística tiene dos términos: distancia mínima desde el nodo
-    #      actual al pendiente más cercano, más el MST sobre los pendientes.
-    #      A diferencia de SingleDelivery, no hay cost_mode el estado incluye
-    #      el nodo actual y un frozenset de entregas pendientes.
-    #
-    # 2. "cómo queda distance_fn para pasarle a _mst_cost?"
-    #     distance_fn recibe dos nodos a y b, obtiene sus coordenadas y
-    #      retorna haversine_km entre ellos. No necesita loop.
-    #
-    # 3. "cuál es el caso borde?"
-    #     Cuando elresto está vacío significa que ya se visitaron todas las
-    #      entregas, entonces se retorna 0.0.
-    actual, elresto = state
-    if not elresto:
+    actual_node, pending = state
+    if not pending:
         return 0.0
-    mindist = math.inf
-    for n in elresto:
-        cooractual = problem.graph.coordinates(actual)
-        coornodo = problem.graph.coordinates(n)
-        dist = haversine_km(cooractual, coornodo)
-        if dist < mindist:
-            mindist = dist
 
-    def distance_fn(a, b):
-        act = problem.graph.coordinates(a)
-        nod = problem.graph.coordinates(b)
-        return haversine_km(act, nod)
+    def get_road_distance(a: str, b: str) -> float:
+        pair = tuple(sorted((a, b)))
+        if pair in problem.heuristicInfo:
+            return problem.heuristicInfo[pair]
 
-    mst = _mst_cost(list(elresto), distance_fn)
-    return mindist + mst
+        _, cost, _ = problem.graph.shortest_path(a, b)
+        problem.heuristicInfo[pair] = cost
+        return cost
 
-    ### END YOUR CODE ###
+    min_dist_to_delivery = min(get_road_distance(actual_node, d) for d in pending)
+
+    mst_cost = _mst_cost(list(pending), get_road_distance)
+
+    return min_dist_to_delivery + mst_cost
 
 
 def straightLineMultiDeliveryHeuristic(
@@ -131,25 +95,20 @@ def straightLineMultiDeliveryHeuristic(
     - This trades some informativeness for much faster heuristic evaluation.
     """
 
-    ### YOUR CODE HERE ###
-    # mostrar frontera, costo, nodos expandidos, acciones...
-    ### END YOUR CODE ###
-    actual, elresto = state
-    if not elresto:
+    actual_node, pending = state
+    if not pending:
         return 0.0
-    mindist = math.inf
-    for i in elresto:
-        actual = problem.graph.coordinates[actual]
-        siguiente = problem.graph.coordinates[i]
-        distancia = haversine_km(actual,siguiente)
-        if distancia < mindist:
-            mindist = distancia
-    def distance_fn(a,b):
-        act = problem.graph.coordinates[a]
-        nod = problem.graph.coordinates[b]
-        return haversine_km(act, nod)
-    mst = _mst_cost(list(elresto),distance_fn)
-    return mindist + mst
+
+    def distance_fn(a: str, b: str) -> float:
+        coord_a = problem.graph.coordinates(a)
+        coord_b = problem.graph.coordinates(b)
+        return haversine_km(coord_a, coord_b)
+
+    min_dist_to_delivery = min(distance_fn(actual_node, d) for d in pending)
+
+    mst_cost = _mst_cost(list(pending), distance_fn)
+
+    return min_dist_to_delivery + mst_cost
     
 
 
