@@ -10,7 +10,6 @@ from graph.road_graph import haversine_km
 from algorithms.problems import SearchProblem, State
 
 
-
 def nullHeuristic(_state: Any, _problem: Any = None) -> float:
     """A trivial admissible heuristic."""
 
@@ -43,10 +42,10 @@ def straightLineHeuristic(state: str, problem: Any) -> float:
     #
     # 2. "cómo retorno 0 cuando el problema optimiza paradas y no kilómetros?"
     #    Verificar hasattr(problem, 'cost_mode') and problem.cost_mode == 'stops'
-    if hasattr(problem, 'cost_mode') and problem.cost_mode == 'stops':
+    if hasattr(problem, "cost_mode") and problem.cost_mode == "stops":
         return 0.0
-    actual = problem.graph.coordinates[state]
-    meta = problem.graph.coordinates[problem.goal]
+    actual = problem.graph.coordinates(state)
+    meta = problem.graph.coordinates(problem.goal)
     return haversine_km(actual, meta)
     ### END YOUR CODE ###
 
@@ -105,19 +104,19 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
         return 0.0
     mindist = math.inf
     for n in elresto:
-        cooractual = problem.graph.coordinates[actual]
-        coornodo = problem.graph.coordinates[n]
+        cooractual = problem.graph.coordinates(actual)
+        coornodo = problem.graph.coordinates(n)
         dist = haversine_km(cooractual, coornodo)
         if dist < mindist:
             mindist = dist
-    def distance_fn(a,b):
-        act = problem.graph.coordinates[a]
-        nod = problem.graph.coordinates[b]
+
+    def distance_fn(a, b):
+        act = problem.graph.coordinates(a)
+        nod = problem.graph.coordinates(b)
         return haversine_km(act, nod)
 
     mst = _mst_cost(list(elresto), distance_fn)
     return mindist + mst
-
 
     ### END YOUR CODE ###
 
