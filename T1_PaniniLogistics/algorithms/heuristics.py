@@ -67,7 +67,58 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
     """
 
     ### YOUR CODE HERE ###
-    
+    # VERSIÓN INICIAL autoría propia:
+    # Se tenía una idea parcial del loop para calcular la distancia mínima,
+    # pero con errores de nombres de variables y sin retorno:
+    #
+    # actual, elresto = state
+    # mindist = math.inf
+    # for n in elresto:
+    #     cooractual = problem.graph.coordinates[actual]
+    #     coornodo = problem.graph.coordinates[nodo]  # nodo no definido, debía ser n
+    #     dist = haversine_km(cooractual, coornodo)
+    #     if dist < mindist:
+    #         mindist = dist
+    # def distance_fn(a,b):
+    #     for m in elresto:              # loop innecesario
+    #         act = problem.graph.coordinates[a]
+    #         nod = problem.graph.coordinates[b]
+    #         distanciaa = haversine_km(act, nod)  # faltaba return
+    #
+    # PROMPTS USADOS CON IA (Claude):
+    #
+    # 1. "cómo estructuro la heurística para MultiDelivery?"
+    #     La heurística tiene dos términos: distancia mínima desde el nodo
+    #      actual al pendiente más cercano, más el MST sobre los pendientes.
+    #      A diferencia de SingleDelivery, no hay cost_mode el estado incluye
+    #      el nodo actual y un frozenset de entregas pendientes.
+    #
+    # 2. "cómo queda distance_fn para pasarle a _mst_cost?"
+    #     distance_fn recibe dos nodos a y b, obtiene sus coordenadas y
+    #      retorna haversine_km entre ellos. No necesita loop.
+    #
+    # 3. "cuál es el caso borde?"
+    #     Cuando elresto está vacío significa que ya se visitaron todas las
+    #      entregas, entonces se retorna 0.0.
+    actual, elresto = state
+    if not elresto:
+        return 0.0
+    mindist = math.inf
+    for n in elresto:
+        cooractual = problem.graph.coordinates[actual]
+        coornodo = problem.graph.coordinates[n]
+        dist = haversine_km(cooractual, coornodo)
+        if dist < mindist:
+            mindist = dist
+    def distance_fn(a,b):
+        act = problem.graph.coordinates[a]
+        nod = problem.graph.coordinates[b]
+        return haversine_km(act, nod)
+
+    mst = _mst_cost(list(elresto), distance_fn)
+    return mindist + mst
+
+
     ### END YOUR CODE ###
 
 
