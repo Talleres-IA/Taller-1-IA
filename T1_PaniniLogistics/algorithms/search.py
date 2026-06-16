@@ -40,25 +40,70 @@ def depthFirstSearch(problem: SearchProblem) -> list[str]:
     """
 
    ### YOUR CODE HERE ###
-    frontier = utils.Stack()
-    frontier.push((problem.getStartState(), []))
+    """def dfs(graph, start):
+
     visited = set()
+    stack = [start]
+
+    while stack:
+
+        vertex = stack.pop()
+
+        if vertex not in visited:
+
+            print(vertex)
+            visited.add(vertex)
+
+            for neighbor in graph[vertex]:
+                stack.append(neighbor)
+    
+    Y el BFS es:
+    
+    def bfs(graph, start):
+
+    visited = set()
+    queue = deque([start])
+
+    while queue:
+
+        vertex = queue.popleft()
+
+        if vertex not in visited:
+
+            print(vertex)
+            visited.add(vertex)
+
+            for neighbor in graph[vertex]:
+                queue.append(neighbor)
+    
+    """
+   # La versión inicial de BFS y DFS se tomo como guia la implementacion de esto en el curso de estructuras de datos, pero con algunos errores que se corrigieron con prompts a la IA (Claude):
+   # 1. "cómo evito expandir nodos ya visitados en DFS?"
+   #    corrección: agregar un conjunto de visitados y verificar antes de expandir.
+   # 2. "cuándo verifico si el nodo es meta en DFS?"
+   #    corrección: verificar meta inmediatamente después de sacar el nodo de la frontera.
+   
+    
+   
+    frrontera = utils.Stack()
+    frrontera.push((problem.getStartState(), []))
+    visitados = set()
  
-    while not frontier.isEmpty():
-        _remember_frontier(problem, frontier)
-        state, actions = frontier.pop()
+    while not frrontera.isEmpty():
+        _remember_frontier(problem, frrontera)
+        state, actions = frrontera.pop()
  
-        if state in visited:
+        if state in visitados:
             continue
-        visited.add(state)
+        visitados.add(state)
  
         if problem.isGoalState(state):
             return actions
  
         for successor, action, _ in problem.getSuccessors(state):
-            if successor not in visited:
-                frontier.push((successor, actions + [action]))
-        _remember_frontier(problem, frontier)
+            if successor not in visitados:
+                frrontera.push((successor, actions + [action]))
+        _remember_frontier(problem, frrontera)
  
     return []
 
@@ -72,23 +117,23 @@ def breadthFirstSearch(problem: SearchProblem) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    frontier = utils.Queue()
-    start = problem.getStartState()
-    frontier.push((start, []))
-    visited = {start}  
+    frrontera = utils.Queue()
+    inicio = problem.getStartState()
+    frrontera.push((inicio, []))
+    visitados = {inicio}  
  
-    while not frontier.isEmpty():
-        _remember_frontier(problem, frontier)
-        state, actions = frontier.pop()
+    while not frrontera.isEmpty():
+        _remember_frontier(problem, frrontera)
+        state, actions = frrontera.pop()
  
         if problem.isGoalState(state):
             return actions
  
         for successor, action, _ in problem.getSuccessors(state):
-            if successor not in visited:
-                visited.add(successor)
-                frontier.push((successor, actions + [action]))
-        _remember_frontier(problem, frontier)
+            if successor not in visitados:
+                visitados.add(successor)
+                frrontera.push((successor, actions + [action]))
+        _remember_frontier(problem, frrontera)
  
     return []
 
@@ -102,16 +147,77 @@ def uniformCostSearch(problem: SearchProblem) -> list[str]:
     """
 
     ### YOUR CODE HERE ###
-    frontier = utils.PriorityQueue()
+    """ Version inicial y con las cosas que estaban mal corregidas con prompts a la IA (Claude):
+    El pront fue: "cómo evito expandir nodos con peor g(n) que el mejor conocido? y Adicionalmente comprender que estaba mal dentro del codigo inicial y corregirlo
+        frontier = utils.PriorityQueue()
     start = problem.getStartState()
+
     frontier.push((start, [], 0.0), 0.0)
+
     best_cost: dict = {start: 0.0}
- 
+    visited = set()
+
     while not frontier.isEmpty():
+
         _remember_frontier(problem, frontier)
+
         state, actions, cost = frontier.pop()
+
+        # ERROR SUTIL:
+        # esto puede bloquear caminos más baratos
+        # que aparezcan después
+        if state in visited:
+            continue
+
+        visited.add(state)
+
+        # ERROR:
+        # revisa goal después de marcar visited
+        # y antes de validar stale entries
+        if problem.isGoalState(state):
+            return actions
+
+        # ERROR IMPORTANTE:
+        # comparación al revés
+        # ignora caminos buenos y deja malos
+        if cost < best_cost.get(state, float("inf")):
+            continue
+
+        for successor, action, step_cost in problem.getSuccessors(state):
+
+            # ERROR:
+            # accidentalmente multiplicando
+            # en vez de sumar
+            new_cost = cost * step_cost
+
+            # ERROR:
+            # prioridad incorrecta
+            # debería usar new_cost
+            priority = len(actions)
+
+            if successor not in visited:
+
+                best_cost[successor] = new_cost
+
+                frontier.push(
+                    (successor, actions + [action], new_cost),
+                    priority
+                )
+
+        _remember_frontier(problem, frontier)
+
+        return []   """
+    
+    frontera = utils.PriorityQueue()
+    inicio = problem.getStartState()
+    frontera.push((inicio, [], 0.0), 0.0)
+    m_costo: dict = {inicio: 0.0}
  
-        if cost > best_cost.get(state, float("inf")):
+    while not frontera.isEmpty():
+        _remember_frontier(problem, frontera)
+        state, actions, cost = frontera.pop()
+ 
+        if cost > m_costo.get(state, float("inf")):
             continue
  
         if problem.isGoalState(state):
@@ -119,10 +225,10 @@ def uniformCostSearch(problem: SearchProblem) -> list[str]:
  
         for successor, action, step_cost in problem.getSuccessors(state):
             new_cost = cost + step_cost
-            if new_cost < best_cost.get(successor, float("inf")):
-                best_cost[successor] = new_cost
-                frontier.push((successor, actions + [action], new_cost), new_cost)
-        _remember_frontier(problem, frontier)
+            if new_cost < m_costo.get(successor, float("inf")):
+                m_costo[successor] = new_cost
+                frontera.push((successor, actions + [action], new_cost), new_cost)
+        _remember_frontier(problem, frontera)
  
     return [] 
 
