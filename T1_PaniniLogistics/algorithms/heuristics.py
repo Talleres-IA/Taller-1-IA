@@ -133,9 +133,25 @@ def straightLineMultiDeliveryHeuristic(
     """
 
     ### YOUR CODE HERE ###
-    utils.raiseNotDefined()
     # mostrar frontera, costo, nodos expandidos, acciones...
     ### END YOUR CODE ###
+    actual, elresto = state
+    if not elresto:
+        return 0.0
+    mindist = math.inf
+    for i in elresto:
+        actual = problem.graph.coordinates[actual]
+        siguiente = problem.graph.coordinates[i]
+        distancia = haversine_km(actual,siguiente)
+        if distancia < mindist:
+            mindist = distancia
+    def distance_fn(a,b):
+        act = problem.graph.coordinates[a]
+        nod = problem.graph.coordinates[b]
+        return haversine_km(act, nod)
+    mst = _mst_cost(list(elresto),distance_fn)
+    return mindist + mst
+    
 
 
 def _mst_cost(nodes: list[str], distance_fn) -> float:
