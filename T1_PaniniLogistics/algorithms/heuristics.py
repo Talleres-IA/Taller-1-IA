@@ -63,12 +63,15 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
     - Split the state into current node and pending deliveries.
     - Cache pairwise road distances in `problem.heuristicInfo` to avoid recomputing.
     - Reuse `_mst_cost` with a distance function defined over delivery node IDs.
-    """
+    ===================================================================== 
+    VERSION INICIAL (Cómputo Dinámico en Caliente):
+    Esta versión original calculaba la distancia Dijkstra dinámicamente para cada par 
+    (nodo_actual, entrega) durante la búsqueda. Debido a que el nodo actual de exploración 
+    cambia continuamente, esto forzaba la ejecución de miles de Dijkstras en caliente, 
+    haciendo que el algoritmo A* fallara por timeout para más de 3 entregas.
 
-    actual_node, pending = state
-    if not pending:
-        return 0.0
-
+    Código Inicial:
+    ====================================================================
     def get_road_distance(a: str, b: str) -> float:
         pair = tuple(sorted((a, b)))
         if pair in problem.heuristicInfo:
@@ -79,8 +82,47 @@ def multiDeliveryHeuristic(state: tuple[str, frozenset[str]], problem: Any) -> f
         return cost
 
     min_dist_to_delivery = min(get_road_distance(actual_node, d) for d in pending)
-
     mst_cost = _mst_cost(list(pending), get_road_distance)
+    return min_dist_to_delivery + mst_cost
+    ====================================================================
+
+    Prompt usado con IA: Gemini Flash 3.5 Medium - Antigravity CLI
+    Añade el precalculo al la funcion multiDeliveryHeuristic
+
+    NUESTRO CAMBIO (Precálculo Único):
+    Dado que el grafo es no dirigido y las entregas son estáticas, corremos Dijkstra una
+    sola vez desde cada una de las k entregas al iniciar el problema. Esto calcula las
+    distancias de camino mínimo desde cada entrega a todo el mapa, permitiendo consultas
+    de distancia O(1) directas en diccionario en lugar de recalcular Dijkstra en cada nodo.
+    """
+    # Precompute all-pairs shortest paths from deliveries to all nodes in the graph
+    if 'precomputed_distances' not in problem.heuristicInfo:
+        precomputed = {}
+        for d in problem.deliveries:
+            distances = {}
+            frontier = [(0.0, d)]
+            best = {d: 0.0}
+            while frontier:
+                cost, node = heapq.heappop(frontier)
+                if cost > best[node]:
+                    continue
+                distances[node] = cost
+                for edge in problem.graph.neighbors(node):
+                    new_cost = cost + edge.distance_km
+                    if new_cost < best.get(edge.target, float('inf')):
+                        best[edge.target] = new_cost
+                        heapq.heappush(frontier, (new_cost, edge.target))
+            precomputed[d] = distances
+        problem.heuristicInfo['precomputed_distances'] = precomputed
+
+    precomputed = problem.heuristicInfo['precomputed_distances']
+
+    min_dist_to_delivery = min(precomputed[d].get(actual_node, float('inf')) for d in pending)
+
+    def get_delivery_distance(a: str, b: str) -> float:
+        return precomputed[a].get(b, float('inf'))
+
+    mst_cost = _mst_cost(list(pending), get_delivery_distance)
 
     return min_dist_to_delivery + mst_cost
 

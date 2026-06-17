@@ -2,3 +2,8 @@
 __pycache__/
 .ipynb_checkpoints/
 .DS_Store
+
+run_experiments.py
+generate_plots.py
+generate_linear_plot.py
+experiment_results.json
