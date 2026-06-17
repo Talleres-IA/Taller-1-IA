@@ -305,13 +305,10 @@ def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
     - Depth counts actions taken from the start, not recursive calls made.
     - Keep a set of nodes on the current path to avoid revisiting them in one branch.
     """
+    
     start = problem.getStartState()
 
     def recursive_dls(state: State, actions: list[str], depth: int, path: set[State]):
-        
-        current = getattr(problem, "_max_frontier_size", 0)
-        problem._max_frontier_size = max(current, len(path))
-
 
         if problem.isGoalState(state):
             return actions
@@ -319,8 +316,12 @@ def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
         if depth == limit:
             return None
 
-        for successor, action, _step_cost in problem.getSuccessors(state):
+        successors = problem.getSuccessors(state)
+
+        for successor, action, step_cost in successors:
+
             if successor not in path:
+
                 path.add(successor)
 
                 result = recursive_dls(
@@ -336,9 +337,8 @@ def depthLimitedSearch(problem: SearchProblem, limit: int) -> list[str] | None:
                 path.remove(successor)
 
         return None
-    
+
     return recursive_dls(start, [], 0, {start})
-    
 
 
 def iterativeDeepeningSearch(
